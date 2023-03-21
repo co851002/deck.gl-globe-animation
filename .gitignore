@@ -23,5 +23,5 @@ yarn-debug.log*
 yarn-error.log*
 
 # experimantal
-/components/RotatingGlobe1
-/components/RotatingGlobe2
+/src/components/RotatingGlobe1
+/src/components/RotatingGlobe2
