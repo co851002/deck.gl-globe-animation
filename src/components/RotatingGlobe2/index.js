@@ -14,7 +14,7 @@ const selectConfig = [
   { value: "106.90", label: "Ulaanbaatar" },
 ];
 
-//Some predefined coords
+//Start coords
 const initCoords = {
   lat: 48.86,
   lon: 2.27,
@@ -57,10 +57,8 @@ const RotatingGlobe = () => {
       startLongitude = viewState.longitude;
 
       const extraRotation = 360 * maxRotations;
-      const targetLonDiff =
-        parseFloat(targetLongitude) - (startLongitude % 360);
-      const finalTargetLongitude =
-        startLongitude + targetLonDiff + extraRotation;
+      const targetLonDiff = parseFloat(targetLongitude) - (startLongitude % 360);
+      const finalTargetLongitude = startLongitude + targetLonDiff + extraRotation;
 
       animationInterval = setInterval(() => {
         const elapsedTime = Date.now() - startTime;
