@@ -3,8 +3,12 @@ import { isMobile } from "react-device-detect";
 import DeckGL from "@deck.gl/react";
 import { TileLayer } from "@deck.gl/geo-layers";
 import { BitmapLayer } from "@deck.gl/layers";
-import { _GlobeView as GlobeView, COORDINATE_SYSTEM } from "@deck.gl/core";
-import { Flex, Center, Affix, Button, Select, rem } from "@mantine/core";
+import {
+  _GlobeView as GlobeView,
+  COORDINATE_SYSTEM,
+  _GlobeController as GlobeController,
+} from "@deck.gl/core";
+import { Flex, Affix, Button, Select, rem } from "@mantine/core";
 
 const initCoords = {
   lat: 48.86,
@@ -22,10 +26,14 @@ const RotatingGlobe = () => {
     bearing: 10,
   });
 
+  const startLongitude = viewState.longitude;
+  const rotations = 5;
+  const extraRotation = 360 * rotations;
+
   const [rotate, setRotate] = useState(false);
 
   // Long from select
-  const [selectedLongitude, setSelectedLongitude] = useState(null);
+  const [selectedLongitude, setSelectedLongitude] = useState(initCoords.lon);
 
   const [targetLongitude, setTargetLongitude] = useState(null);
 
@@ -34,15 +42,59 @@ const RotatingGlobe = () => {
 
   const selectConfig = [
     { value: "0.127", label: "London" },
-    { value: "84.124", label: "Nepal" },
+    { value: "84.124", label: "Kathmandu" },
     { value: "-74.00", label: "New York" },
     { value: "106.90", label: "Ulaanbaatar" },
   ];
 
-  // Nah
-  //   const easing = (t) => {
-  //     return t * (2 - t);
-  //   };
+  class CustomController extends GlobeController {
+    constructor({selectedLongitude, ...rest}) {
+      super(rest);
+      this.selectedLongitude = selectedLongitude;
+    }
+    handleEvent(event) {
+      console.log(event);
+      console.log(event.direction);
+
+      // if (event.type === 'panend') {
+      //   // do something
+      //   //event direction - right: 2, left: 4
+      //   // if direction is 1 || 2 use the rotate animation otherwise regular pan
+      //   console.log('event');
+      // } else {
+      //   super.handleEvent(event);
+      // }
+
+      // if (event.type === 'panend' && (event.direction === 1 || event.direction === 2)) {
+      //   const targetLongitude = selectedLongitude;
+      //   setTargetLongitude(targetLongitude);
+      //   setRotate(true);
+      //   setSpinCounter((prevCounter) => prevCounter + 1);
+      // } else {
+      //   super.handleEvent(event);
+      // }
+
+      if (
+        event.type === "panend" &&
+        (event.direction === 1 || event.direction === 2)
+      ) {
+        // const bearingChange = event.deltaX ; // Adjust divisor to control sensitivity
+        const targetLongitude = parseFloat(selectedLongitude) 
+        console.log('rotate here:', targetLongitude )
+        const targetLonDiff =
+        parseFloat(targetLongitude) - (startLongitude % 360);
+      const finalTargetLongitude =
+        startLongitude + targetLonDiff + extraRotation;
+        console.log('rotate here:', finalTargetLongitude )
+
+        setTargetLongitude(finalTargetLongitude);
+        setRotate(true);
+        setSpinCounter((prevCounter) => prevCounter + 1);
+      } else {
+        super.handleEvent(event);
+      }
+    }
+  }
 
   useEffect(() => {
     let animationInterval;
@@ -56,8 +108,10 @@ const RotatingGlobe = () => {
       startLongitude = viewState.longitude;
       const rotations = 5;
       const extraRotation = 360 * rotations;
-      const targetLonDiff = parseFloat(targetLongitude) - (startLongitude % 360);
-      const finalTargetLongitude = startLongitude + targetLonDiff + extraRotation;
+      const targetLonDiff =
+        parseFloat(targetLongitude) - (startLongitude % 360);
+      const finalTargetLongitude =
+        startLongitude + targetLonDiff + extraRotation;
 
       animationInterval = setInterval(() => {
         const elapsedTime = Date.now() - startTime;
@@ -110,11 +164,11 @@ const RotatingGlobe = () => {
     }),
   ];
 
-  const controller = {
-    controller: true,
-    inertia: 3000,
-    touchRotate: true,
-  };
+  // const controller = {
+  //   controller: true,
+  //   inertia: 3000,
+  //   touchRotate: true,
+  // };
 
   const onClickHandler = (targetLon) => {
     if (!rotate) {
@@ -139,7 +193,9 @@ const RotatingGlobe = () => {
         viewState={viewState}
         onViewStateChange={({ viewState }) => setViewState(viewState)}
         views={new GlobeView()}
-        controller={controller}
+        controller={CustomController}
+        selectedLongitude={selectedLongitude}
+
       />
 
       <Affix position={{ bottom: rem(20), right: rem(15) }}>
@@ -154,7 +210,7 @@ const RotatingGlobe = () => {
         >
           <Select
             label="Select a country"
-            placeholder="Location"
+            placeholder="Nothing selected"
             value={selectedLongitude}
             onChange={handleLongitudeChange}
             data={selectConfig}

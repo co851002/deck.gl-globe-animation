@@ -5,7 +5,7 @@ import React from 'react';
 // import { _GlobeView, COORDINATE_SYSTEM } from '@deck.gl/core';
 // import { TileLayer } from '@deck.gl/geo-layers';
 // import { AnimationLoop, Model, Geometry } from '@luma.gl/core';
-import RotatingGlobe from './components/RotatingGlobe3'
+import RotatingGlobe from './components/RotatingGlobe2'
 
 // const views = new _GlobeView({
 //   resolution: 10

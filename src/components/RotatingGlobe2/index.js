@@ -4,8 +4,17 @@ import DeckGL from "@deck.gl/react";
 import { TileLayer } from "@deck.gl/geo-layers";
 import { BitmapLayer } from "@deck.gl/layers";
 import { _GlobeView as GlobeView, COORDINATE_SYSTEM } from "@deck.gl/core";
-import { Flex, Center, Affix, Button, Select, rem } from "@mantine/core";
+import { Flex, Affix, Button, Select, rem, Slider, Text } from "@mantine/core";
 
+//Some predefined coords
+const selectConfig = [
+  { value: "0.127", label: "London" },
+  { value: "84.124", label: "Nepal" },
+  { value: "-74.00", label: "New York" },
+  { value: "106.90", label: "Ulaanbaatar" },
+];
+
+//Some predefined coords
 const initCoords = {
   lat: 48.86,
   lon: 2.27,
@@ -22,27 +31,19 @@ const RotatingGlobe = () => {
     bearing: 10,
   });
 
+  //Rotation state
   const [rotate, setRotate] = useState(false);
 
-  // Long from select
+  // Longitude from select
   const [selectedLongitude, setSelectedLongitude] = useState(null);
-
   const [targetLongitude, setTargetLongitude] = useState(null);
 
-  // to force a state update- probably a better way to avoid roate returining true when t >= 1
+  // to force a state update - there's probably a better way to avoid rotate returining true when t >= 1
   const [spinCounter, setSpinCounter] = useState(0);
 
-  const selectConfig = [
-    { value: "0.127", label: "London" },
-    { value: "84.124", label: "Nepal" },
-    { value: "-74.00", label: "New York" },
-    { value: "106.90", label: "Ulaanbaatar" },
-  ];
-
-  // Nah
-  //   const easing = (t) => {
-  //     return t * (2 - t);
-  //   };
+  //Slider & prop states for maxRotations and easing time
+  const [maxRotations, setMaxRotations] = useState(5);
+  const [easing, setEasing] = useState(2);
 
   useEffect(() => {
     let animationInterval;
@@ -54,14 +55,16 @@ const RotatingGlobe = () => {
     if (rotate) {
       startTime = Date.now();
       startLongitude = viewState.longitude;
-      const rotations = 5;
-      const extraRotation = 360 * rotations;
-      const targetLonDiff = parseFloat(targetLongitude) - (startLongitude % 360);
-      const finalTargetLongitude = startLongitude + targetLonDiff + extraRotation;
+
+      const extraRotation = 360 * maxRotations;
+      const targetLonDiff =
+        parseFloat(targetLongitude) - (startLongitude % 360);
+      const finalTargetLongitude =
+        startLongitude + targetLonDiff + extraRotation;
 
       animationInterval = setInterval(() => {
         const elapsedTime = Date.now() - startTime;
-        const t = elapsedTime / 2000;
+        const t = elapsedTime / (easing * 1000);
         const easedT = easeInOutQuad(t);
         const newLongitude =
           startLongitude + (finalTargetLongitude - startLongitude) * easedT;
@@ -143,14 +146,43 @@ const RotatingGlobe = () => {
       />
 
       <Affix position={{ bottom: rem(20), right: rem(15) }}>
+        <Slider
+          labelAlwaysOn
+          label={(maxRotations) => `${maxRotations}`}
+          value={maxRotations}
+          onChange={setMaxRotations}
+          defaultValue={5}
+          min={1}
+          max={10}
+          size="xs"
+          radius="xs"
+          style={{ margin: "20px auto 0" }}
+        />
+        <Text fz="sm">Max Rotations</Text>
+
+        <Slider
+          labelAlwaysOn
+          label={(easing) => `${easing}`}
+          value={easing}
+          onChange={setEasing}
+          defaultValue={2}
+          min={1}
+          max={10}
+          size="xs"
+          radius="xs"
+          style={{ margin: "20px auto 0" }}
+        />
+        <Text fz="sm">Easing Duration (secs)</Text>
+
         <Flex
-          mih={100}
+          mih={60}
           bg="rgba(0, 0, 0, .0)"
           gap="md"
           justify="center"
           align="end"
           direction="row"
           wrap="wrap"
+          style={{ margin: "20px auto 0" }}
         >
           <Select
             label="Select a country"
@@ -158,6 +190,7 @@ const RotatingGlobe = () => {
             value={selectedLongitude}
             onChange={handleLongitudeChange}
             data={selectConfig}
+            defailtValue="Blahhh"
           />
           <Button
             variant="gradient"
