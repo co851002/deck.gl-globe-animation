@@ -4,7 +4,7 @@ import DeckGL from "@deck.gl/react";
 import { TileLayer } from "@deck.gl/geo-layers";
 import { BitmapLayer } from "@deck.gl/layers";
 import { _GlobeView as GlobeView, COORDINATE_SYSTEM } from "@deck.gl/core";
-import { Grid, Affix, Button, Select, rem, Slider, Text, Container } from "@mantine/core";
+import { Grid, Affix, Button, Select, rem, Slider, Text, Container, Center } from "@mantine/core";
 
 //Some predefined coords
 const selectConfig = [
@@ -146,12 +146,17 @@ const RotatingGlobe = () => {
                 controller={controller}
             />
 
-            <Affix position={{ bottom: rem(20), left: rem(0), width: "100%" }}>
+            <Affix position={{ bottom: rem(10), right: rem(10), width: 300 }} 
+            style={{ 
+                background: "rgb(0 0 0 / 7%" ,
+                borderRadius: '5px',
+                padding: '20px 0'
+                }}>
                 <Container fluid>
 
-                    <Grid gutter={5} gutterXs="md" gutterMd="xl" gutterXl={50} align="flex-end" mx="8">
-                        <Grid.Col xs={6} md={6} lg={3} >
-                            <Text fz="sm">Max Rotations</Text>
+                    <Grid gutter={5} gutterXs="md" gutterMd="xl" gutterXl={50} align="flex-end" mx="12">
+                        <Grid.Col xs={12}  >
+                            <Text fz="xs">Max Rotations</Text>
 
                             <Slider
                                 label={(maxRotations) => `${maxRotations}`}
@@ -167,9 +172,9 @@ const RotatingGlobe = () => {
 
 
                         </Grid.Col>
-                        <Grid.Col xs={6} md={6} lg={3} >
+                        <Grid.Col xs={12}  >
 
-                            <Text fz="sm">Easing Duration (secs)</Text>
+                            <Text fz="xs">Easing Duration (secs)</Text>
 
                             <Slider
                                 label={(easing) => `${easing}`}
@@ -183,8 +188,9 @@ const RotatingGlobe = () => {
                                 style={{ margin: "20px auto 0" }}
                             />
                         </Grid.Col>
-                        <Grid.Col xs={6} md={6} lg={4} > 
+                        <Grid.Col xs={12}  > 
                         <Select
+                        fz="xs"
                             label="Select a country"
                             placeholder="Location"
                             value={selectedLongitude}
@@ -193,14 +199,19 @@ const RotatingGlobe = () => {
                         />
                         </Grid.Col>
 
-                        <Grid.Col xs={6} md={6} lg={2} >
+                        <Grid.Col xs={12} items={'center'}  >
+                        <Center maw={300} h={50} mx="auto">
+
                             <Button
                             variant="gradient"
                             gradient={{ from: "indigo", to: "cyan" }}
                             onClick={() => onClickHandler(selectedLongitude)}
                         >
                             Spin
-                        </Button></Grid.Col>
+                        </Button>
+                        </Center>
+                        
+                        </Grid.Col>
                     </Grid>
                 </Container>
 
