@@ -19,10 +19,11 @@ import {
 
 //Some predefined coords
 const selectConfig = [
-  { value: "0.127", label: "London" },
-  { value: "84.124", label: "Nepal" },
-  { value: "-74.00", label: "New York" },
+  { value: "0.12", label: "London" },
+  { value: "84.12", label: "Kathmandu" },
   { value: "106.90", label: "Ulaanbaatar" },
+  { value: "-74.00", label: "New York" },
+  { value: "-123.19", label: "Vancouver" },
 ];
 
 //Start coords
@@ -83,44 +84,37 @@ const RotatingGlobe = () => {
   const [spinCounter, setSpinCounter] = useState(0);
 
   //Slider & prop states for maxRotations and easing time
-  const [maxRotations, setMaxRotations] = useState(8);
-  const [easing, setEasing] = useState(8);
-  const [friction, setFriction] = useState(8);
+  //const [maxRotations, setMaxRotations] = useState(8);
+  const [rotations, setRotations] = useState(5);
+  const [spinSpeed, setSpinSpeed] = useState(5);
+  const [easing, setEasing] = useState(15);
 
   useEffect(() => {
-    let animationInterval;
-    let startTime;
-    let startLongitude;
-
-    const exponentialDecay = (t, friction) => 1 - Math.exp(-friction * t);
-
+    let animationInterval, startTime, startLongitude;
+    const easeOutQuart = (t) => 1 - Math.pow(1 - t, 4);
     if (rotate) {
       startTime = Date.now();
       startLongitude = viewState.longitude;
-
-      const extraRotation = 360 * maxRotations;
+      const extraRotation = 360 * rotations * spinSpeed;
       const targetLonDiff =
         parseFloat(targetLongitude) - (startLongitude % 360);
       const finalTargetLongitude =
         startLongitude + targetLonDiff + extraRotation;
-
       animationInterval = setInterval(() => {
         const elapsedTime = Date.now() - startTime;
         const t = elapsedTime / (easing * 1000);
-        const easedT = exponentialDecay(t, friction);
+        const easedT = easeOutQuart(t);
         const newLongitude =
           startLongitude + (finalTargetLongitude - startLongitude) * easedT;
-
+        // console.log("new lon:", newLongitude);
         setViewState((prevViewState) => {
           return {
             ...prevViewState,
             longitude: newLongitude,
-            // latitude: initCoords.lat, // To have the lat fixed to initCoords
           };
         });
 
         if (t >= 1) {
-          setRotate(false);
           clearInterval(animationInterval);
         }
       }, 30);
@@ -150,7 +144,7 @@ const RotatingGlobe = () => {
     <div>
       <DeckGL
         width="100%"
-        height="70%"
+        height="100%"
         layers={layers}
         viewState={viewState}
         onViewStateChange={({ viewState }) => setViewState(viewState)}
@@ -176,49 +170,56 @@ const RotatingGlobe = () => {
             mx="12"
           >
             <Grid.Col xs={12}>
-              <Text fz="xs">Friction</Text>
+              <Text fz="xs">Rotation Multiplier</Text>
               <Slider
-                label={(friction) => `${friction}`}
-                value={friction}
-                onChange={setFriction}
+                label={(rotations) => `${rotations}`}
+                value={rotations}
+                onChange={setRotations}
                 defaultValue={5}
-                min={1}
-                max={10}
-                size="xs"
-                radius="xs"
-                style={{ margin: "20px auto 0" }}
-              />
-            </Grid.Col>
-            <Grid.Col xs={12}>
-              <Text fz="xs">Max Rotations</Text>
-
-              <Slider
-                label={(maxRotations) => `${maxRotations}`}
-                value={maxRotations}
-                onChange={setMaxRotations}
-                defaultValue={5}
-                min={1}
+                min={2}
                 max={10}
                 size="xs"
                 radius="xs"
                 style={{ margin: "20px auto 0", width: "100%" }}
               />
             </Grid.Col>
-            <Grid.Col xs={12}>
-              <Text fz="xs">Easing Duration (secs)</Text>
 
+            <Grid.Col xs={12}>
+              <Text fz="xs">Spin Speed</Text>
+              <Slider
+                label={(spinSpeed) => `${spinSpeed}`}
+                value={spinSpeed}
+                onChange={setSpinSpeed}
+                defaultValue={2}
+                min={2}
+                max={10}
+                size="xs"
+                radius="xs"
+                style={{ margin: "20px auto 0", width: "100%" }}
+              />
+            </Grid.Col>
+
+            <Grid.Col xs={12}>
+              <Text fz="xs">Easing Duration</Text>
               <Slider
                 label={(easing) => `${easing}`}
                 value={easing}
                 onChange={setEasing}
-                defaultValue={2}
-                min={1}
-                max={10}
+                defaultValue={10}
+                min={5}
+                max={25}
                 size="xs"
                 radius="xs"
-                style={{ margin: "20px auto 0" }}
+                style={{ margin: "20px auto 0", width: "100%" }}
               />
             </Grid.Col>
+
+            {/* <Grid.Col xs={12}>
+              <Text fz="xs">
+                Spin duration: {phaseOneDuration + phaseTwoDuration} seconds{" "}
+              </Text>
+            </Grid.Col> */}
+
             <Grid.Col xs={12}>
               <Select
                 fz="xs"
