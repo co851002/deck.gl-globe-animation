@@ -223,7 +223,7 @@ const RotatingGlobe = () => {
             <Grid.Col xs={12}>
               <Select
                 fz="xs"
-                label="Select a country"
+                label="Select a city"
                 placeholder="Location"
                 value={selectedLongitude}
                 onChange={handleLongitudeChange}
